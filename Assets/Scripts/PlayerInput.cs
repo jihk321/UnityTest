@@ -30,9 +30,9 @@ public class PlayerInput : MonoBehaviour {
         }
 
         // UpDown에 관한 입력 감지
-        UpDown = Input.GetAxis(UpDownAxisName);
+        UpDown = Input.GetAxisRaw(UpDownAxisName);
         // LeRi에 관한 입력 감지
-        LeRi = Input.GetAxis(LeRiAxisName);
+        LeRi = Input.GetAxisRaw(LeRiAxisName);
         
         if (Input.GetMouseButton(2)) // 마우스 휠 클릭하는 동안 마우스 x값 가져옴 
             Debug.Log(" 마우스 포지션 :" + Input.mousePosition);
