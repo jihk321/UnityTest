@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI; // AI, 내비게이션 시스템 관련 코드 가져오기
+using UnityEngine.UI;
 
 // 좀비 AI 구현
 public class Zombie : LivingEntity
@@ -22,6 +23,10 @@ public class Zombie : LivingEntity
 
     public float timeBetAttack = 0.5f; // 공격 간격
     private float lastAttackTime; // 마지막 공격 시점
+
+    private Text zombieHP;
+    private Slider zombiebar;
+    private Transform zombieuitrans;
 
     // 추적할 대상이 존재하는지 알려주는 프로퍼티
     private bool hasTarget {
@@ -45,14 +50,18 @@ public class Zombie : LivingEntity
         zombieAudioPlayer = GetComponent<AudioSource>();
 
         zombieRenderer = GetComponentInChildren<Renderer>();
+        zombieHP = GetComponentInChildren<Text>();
+        zombiebar = GetComponentInChildren<Slider>();
+        zombieuitrans = zombieHP.GetComponent<Transform>().parent;
     }
 
     // 좀비 AI의 초기 스펙을 결정하는 셋업 메서드
     public void Setup(ZombieData zombieData) {
         startingHealth = zombieData.health;
-        health = zombieData.damage;
+        health = zombieData.health;
 
         damage = zombieData.damage;
+        
         navMeshAgent.speed = zombieData.speed;
         zombieRenderer.material.color = zombieData.skinColor;
     }
@@ -60,6 +69,8 @@ public class Zombie : LivingEntity
     private void Start() {
         // 게임 오브젝트 활성화와 동시에 AI의 추적 루틴 시작
         StartCoroutine(UpdatePath());
+        StartCoroutine(UIView());
+        ChangeHealth();
     }
 
     private void Update() {
@@ -69,6 +80,7 @@ public class Zombie : LivingEntity
 
     // 주기적으로 추적할 대상의 위치를 찾아 경로 갱신
     private IEnumerator UpdatePath() {
+        navMeshAgent.enabled = true;
         // 살아 있는 동안 무한 루프
         while (!dead)
         {
@@ -105,6 +117,7 @@ public class Zombie : LivingEntity
             zombieAudioPlayer.PlayOneShot(hitSound);
         }
         base.OnDamage(damage, hitPoint, hitNormal);
+        ChangeHealth();
     }
 
     // 사망 처리
@@ -136,5 +149,24 @@ public class Zombie : LivingEntity
                 attackTarget.OnDamage(damage, hitPoint, hitNormal);
             }
         }
+    }
+
+    private void ChangeHealth() {
+        float now = health;
+        float max = startingHealth;
+
+        zombieHP.text = now + "/" + max;
+        zombiebar.value = health/startingHealth;
+
+    }
+
+    private IEnumerator UIView() {
+        while ( !dead ) {
+            yield return new WaitForSeconds(0.2f);
+            
+            zombieuitrans.LookAt(Camera.main.transform);
+            // Debug.Log(targetEntity);
+        }
+        
     }
 }

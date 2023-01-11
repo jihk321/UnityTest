@@ -73,8 +73,6 @@ public class Gun : MonoBehaviour {
         else {
             hitPosition = fireTransform.position + fireTransform.forward * fireDistance;
         }
-            
-        Debug.Log("hitposition : " + hitPosition);
         StartCoroutine(ShotEffect(hitPosition));
 
         magAmmo--;
