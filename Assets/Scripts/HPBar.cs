@@ -9,7 +9,7 @@ public class HPBar : MonoBehaviour
     [SerializeField] private Slider slider;
     [SerializeField] private CanvasGroup healthbar;
     private float dist;
-
+    private bool routine;
     private Transform lookAtTarget;
 
     // private void Awake()
@@ -37,9 +37,11 @@ public class HPBar : MonoBehaviour
     public IEnumerator FarAttack() {
 
         if (healthbar.alpha == 0f) {
+            routine = true;
+            Debug.Log("코루틴 실행됨");
             healthbar.alpha = 1f;
             yield return new WaitForSeconds(1);
-            // healthbar.alpha = 0f;
+            routine = false;
         } 
     }
 
@@ -47,7 +49,7 @@ public class HPBar : MonoBehaviour
     {
         if (this.lookAtTarget == null)
             return ;
-        Distance();
+        else if (routine != true) Distance();
         transform.LookAt(lookAtTarget); 
     }
 
