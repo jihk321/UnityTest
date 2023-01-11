@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour {
     private void Start() {
         // 플레이어 캐릭터의 사망 이벤트 발생시 게임 오버
         FindObjectOfType<PlayerHealth>().onDeath += EndGame;
+        Cursor.lockState = CursorLockMode.Locked;    
     }
 
     // 점수를 추가하고 UI 갱신
@@ -56,5 +57,7 @@ public class GameManager : MonoBehaviour {
         isGameover = true;
         // 게임 오버 UI를 활성화
         UIManager.instance.SetActiveGameoverUI(true);
+        UIManager.instance.SetActiveCrosshair(false);
+        Cursor.lockState = CursorLockMode.Confined;    
     }
 }

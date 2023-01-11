@@ -24,6 +24,7 @@ public class UIManager : MonoBehaviour {
     public Text scoreText; // 점수 표시용 텍스트
     public Text waveText; // 적 웨이브 표시용 텍스트
     public GameObject gameoverUI; // 게임 오버시 활성화할 UI 
+    public GameObject crosshair;
 
     // 탄약 텍스트 갱신
     public void UpdateAmmoText(int magAmmo, int remainAmmo) {
@@ -45,6 +46,9 @@ public class UIManager : MonoBehaviour {
         gameoverUI.SetActive(active);
     }
 
+    public void SetActiveCrosshair(bool active) {
+        crosshair.SetActive(active);
+    }
     // 게임 재시작
     public void GameRestart() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);

@@ -68,7 +68,7 @@ public class Zombie : LivingEntity
 
     private void Start() {
         // 게임 오브젝트 활성화와 동시에 AI의 추적 루틴 시작
-        // StartCoroutine(UpdatePath());
+        StartCoroutine(UpdatePath());
         
         hpBar.LookAtTarget(Camera.main.transform);
     }
@@ -120,7 +120,7 @@ public class Zombie : LivingEntity
         base.OnDamage(damage, hitPoint, hitNormal);
 
         hpBar.ChnageHealth(health, startingHealth);
-        StartCoroutine(hpBar.FarAttack());
+        hpBar.ShowDuring(1.5f);
     }
 
     // 사망 처리

@@ -8,8 +8,8 @@ public class HPBar : MonoBehaviour
     [SerializeField] private Text text;
     [SerializeField] private Slider slider;
     [SerializeField] private CanvasGroup healthbar;
-    private float dist;
-    private bool routine;
+    [SerializeField] private float hideDistance = 10.0f;
+    private Coroutine routine;
     private Transform lookAtTarget;
 
     // private void Awake()
@@ -17,6 +17,11 @@ public class HPBar : MonoBehaviour
     //     text = GetComponentInChildren<Text>();
     //     slider = GetComponentInChildren<Slider>();
     // }
+
+    private void Awake()
+    {
+        routine = null;
+    }
 
     public void ChnageHealth(float value, float maxValue)
     {
@@ -28,28 +33,38 @@ public class HPBar : MonoBehaviour
     => this.lookAtTarget = lookAtTarget;
 
     private void Distance() {
-        dist = Vector3.Distance(this.lookAtTarget.position, transform.position);
+        float dist = Vector3.Distance(this.lookAtTarget.position, transform.position);
         // Debug.Log(dist);
-        if (dist > 10.0f) healthbar.alpha = 0f;
-        else healthbar.alpha = 1f;
+        if (dist > hideDistance)
+            healthbar.alpha = 0f;
+        else
+            healthbar.alpha = 1f;
     }
 
-    public IEnumerator FarAttack() {
+    public void ShowDuring(float showTime)
+    {
+        if (routine != null)
+            StopCoroutine(routine);
+        
+        routine = StartCoroutine(ShowHealthBar(showTime));
+    }
 
-        if (healthbar.alpha == 0f) {
-            routine = true;
-            Debug.Log("코루틴 실행됨");
-            healthbar.alpha = 1f;
-            yield return new WaitForSeconds(1);
-            routine = false;
-        } 
+    public IEnumerator ShowHealthBar(float showTime) {
+        Debug.Log("코루틴 실행됨");
+        healthbar.alpha = 1f;
+        yield return new WaitForSeconds(showTime);
+        
+        routine = null;
     }
 
     private void Update()
     {
         if (this.lookAtTarget == null)
             return ;
-        else if (routine != true) Distance();
+        
+        if (routine == null)
+            Distance();
+        
         transform.LookAt(lookAtTarget); 
     }
 
