@@ -24,8 +24,7 @@ public class Zombie : LivingEntity
     public float timeBetAttack = 0.5f; // 공격 간격
     private float lastAttackTime; // 마지막 공격 시점
 
-    private Text zombieHP;
-    private Slider zombiebar;
+    private HPBar hpBar;
     private Transform zombieuitrans;
 
     // 추적할 대상이 존재하는지 알려주는 프로퍼티
@@ -50,15 +49,16 @@ public class Zombie : LivingEntity
         zombieAudioPlayer = GetComponent<AudioSource>();
 
         zombieRenderer = GetComponentInChildren<Renderer>();
-        zombieHP = GetComponentInChildren<Text>();
-        zombiebar = GetComponentInChildren<Slider>();
-        zombieuitrans = zombieHP.GetComponent<Transform>().parent;
+
+        hpBar = GetComponentInChildren<HPBar>();
     }
 
     // 좀비 AI의 초기 스펙을 결정하는 셋업 메서드
     public void Setup(ZombieData zombieData) {
         startingHealth = zombieData.health;
         health = zombieData.health;
+
+        hpBar.ChnageHealth(health, startingHealth);
 
         damage = zombieData.damage;
         
@@ -68,9 +68,9 @@ public class Zombie : LivingEntity
 
     private void Start() {
         // 게임 오브젝트 활성화와 동시에 AI의 추적 루틴 시작
-        StartCoroutine(UpdatePath());
-        StartCoroutine(UIView());
-        ChangeHealth();
+        // StartCoroutine(UpdatePath());
+        
+        hpBar.LookAtTarget(Camera.main.transform);
     }
 
     private void Update() {
@@ -116,8 +116,11 @@ public class Zombie : LivingEntity
 
             zombieAudioPlayer.PlayOneShot(hitSound);
         }
+
         base.OnDamage(damage, hitPoint, hitNormal);
-        ChangeHealth();
+
+        hpBar.ChnageHealth(health, startingHealth);
+        StartCoroutine(hpBar.FarAttack());
     }
 
     // 사망 처리
@@ -135,7 +138,8 @@ public class Zombie : LivingEntity
         zombieAnimator.SetTrigger("Die");
         zombieAudioPlayer.PlayOneShot(deathSound);
     }
-    private void OnTriggerStay(Collider other) {
+    private void OnTriggerStay(Collider other)
+    {
         // 트리거 충돌한 상대방 게임 오브젝트가 추적 대상이라면 공격 실행
         if ( !dead && Time.time >= lastAttackTime + timeBetAttack ) {
             LivingEntity attackTarget = other.GetComponent<LivingEntity>();
@@ -149,24 +153,5 @@ public class Zombie : LivingEntity
                 attackTarget.OnDamage(damage, hitPoint, hitNormal);
             }
         }
-    }
-
-    private void ChangeHealth() {
-        float now = health;
-        float max = startingHealth;
-
-        zombieHP.text = now + "/" + max;
-        zombiebar.value = health/startingHealth;
-
-    }
-
-    private IEnumerator UIView() {
-        while ( !dead ) {
-            yield return new WaitForSeconds(0.2f);
-            
-            zombieuitrans.LookAt(Camera.main.transform);
-            // Debug.Log(targetEntity);
-        }
-        
     }
 }

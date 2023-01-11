@@ -30,7 +30,6 @@ public class PlayerInput : MonoBehaviour {
             fire = false;
             reload = false;
             return;
-            UIView();
         }
 
         // UpDown에 관한 입력 감지
@@ -47,11 +46,5 @@ public class PlayerInput : MonoBehaviour {
         fire = Input.GetButton(fireButtonName);
         // reload에 관한 입력 감지
         reload = Input.GetButtonDown(reloadButtonName);
-    }
-
-    private void UIView() {
-        zoms = GameObject.FindGameObjectsWithTag("Zombie");
-        Debug.Log(zoms);
-        
     }
 }
