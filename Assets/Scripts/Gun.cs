@@ -62,7 +62,7 @@ public class Gun : MonoBehaviour {
         RaycastHit hit;
         Vector3 hitPosition = Vector3.zero;
 
-        if (Physics.Raycast(fireTransform.position, fireTransform.forward, out hit, fireDistance)) {
+        if (Physics.Raycast(fireTransform.position, Camera.main.transform.forward, out hit, fireDistance)) {
             IDamageable target = hit.collider.GetComponent<IDamageable>();
 
             if (target != null) 
@@ -71,8 +71,10 @@ public class Gun : MonoBehaviour {
             hitPosition = hit.point;
         }
         else {
-            hitPosition = fireTransform.position + fireTransform.forward * fireDistance;
+            // hitPosition = fireTransform.position + fireTransform.forward * fireDistance;
+            hitPosition = fireTransform.position + Camera.main.transform.forward * fireDistance;
         }
+
         StartCoroutine(ShotEffect(hitPosition));
 
         magAmmo--;

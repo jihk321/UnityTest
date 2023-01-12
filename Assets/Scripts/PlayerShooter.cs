@@ -44,6 +44,7 @@ public class PlayerShooter : MonoBehaviour {
         {
             // UI 매니저의 탄약 텍스트에 탄창의 탄약과 남은 전체 탄약을 표시
             UIManager.instance.UpdateAmmoText(gun.magAmmo, gun.ammoRemain);
+            UIManager.instance.ZeroBullet(gun.magAmmo);
         }
     }
 

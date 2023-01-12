@@ -56,8 +56,12 @@ public class GameManager : MonoBehaviour {
         // 게임 오버 상태를 참으로 변경
         isGameover = true;
         // 게임 오버 UI를 활성화
-        UIManager.instance.SetActiveGameoverUI(true);
-        UIManager.instance.SetActiveCrosshair(false);
+        
+        UIManager.instance.GameOvers();
+        
         Cursor.lockState = CursorLockMode.Confined;    
+
+        // UserSetting.instance.score = score; // 점수 전달
+               
     }
 }
