@@ -31,9 +31,16 @@ public class UIManager : MonoBehaviour {
 
     public GameObject scoreui;
     public InputField inputscore;
+    public int endscore;
     private bool checkbullet = true;
-
+    private string[] player = new string[100];
+    private int[] score = new int[100];
+    int index=0;
     // 탄약 텍스트 갱신
+    void Start()
+    {
+        ShowAllData();    
+    }
     public void UpdateAmmoText(int magAmmo, int remainAmmo) {
         ammoText.text = magAmmo + "/" + remainAmmo;
     }
@@ -57,11 +64,17 @@ public class UIManager : MonoBehaviour {
         crosshair.SetActive(active);
     }
 
-    public void GameOvers() {
+    public void GameOvers() { // 게임 오버일 때 실행할 것들
         SetActiveGameoverUI(true);
         SetActiveCrosshair(false);
         scoreui.SetActive(true);
+    }
 
+    public void NameButton() {
+        string username = inputscore.text;
+        Debug.Log(username);
+        SetScore(username,endscore);
+        // GetScore();
     }
 
     public void ZeroBullet(int bullet){
@@ -86,5 +99,49 @@ public class UIManager : MonoBehaviour {
     // 게임 재시작
     public void GameRestart() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void SetScore(string player, int score) {
+        string saveName;
+        int saveScore;
+        for (int i = 0; i < 100; i++ ) {
+            saveName = PlayerPrefs.GetString($"PlayerName{i}");
+            saveScore = PlayerPrefs.GetInt($"Score{i}");
+            if (player == saveName && saveScore < score) {
+                PlayerPrefs.SetInt($"Score{i}", score);
+                PlayerPrefs.Save();
+                return;
+            }
+            if (PlayerPrefs.HasKey($"PlayerName{index}") == false)
+                break;
+            Debug.Log(index);
+            index++;
+        }
+        PlayerPrefs.SetString($"PlayerName{index}", player);
+        PlayerPrefs.SetInt($"Score{index}", score);
+        PlayerPrefs.Save();
+    }
+
+    private void GetScore() { 
+        for (int i = 0; i < index; i ++) {
+
+        }
+        string PlayerList = PlayerPrefs.GetString("PlayerName");
+        int ScoreList = PlayerPrefs.GetInt("Score");
+
+        Debug.Log($"플레이어 : {PlayerList} 점수 : {ScoreList}");
+    }
+
+    public void ShowAllData() {
+        // PlayerPrefs.DeleteAll();
+        for (int i = 0; i < 100; i++) {
+            player[i] = PlayerPrefs.GetString($"PlayerName{i}");
+            score[i] = PlayerPrefs.GetInt($"Score{i}");
+            // string player = PlayerPrefs.GetString($"PlayerName{i}");
+            if (string.IsNullOrEmpty(player[i]))
+                break;
+            Debug.Log(PlayerPrefs.GetString($"PlayerName{i}"));
+            Debug.Log(PlayerPrefs.GetInt($"Score{i}"));
+        }
     }
 }

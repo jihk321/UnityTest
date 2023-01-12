@@ -18,10 +18,10 @@ public class UserSetting : MonoBehaviour
     public int score {get; set;}
     // Start is called before the first frame update
 
-    private void Update() {
-        if (Input.GetKeyDown(KeyCode.Return))
-            setUser();
-    }
+    // private void Update() {
+    //     if (Input.GetKeyDown(KeyCode.Return))
+    //         setUser();
+    // }
 
     public void SetShowInput() {
         scoreboard.SetActive(true);

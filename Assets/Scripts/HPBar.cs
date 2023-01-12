@@ -50,7 +50,7 @@ public class HPBar : MonoBehaviour
     }
 
     public IEnumerator ShowHealthBar(float showTime) {
-        Debug.Log("코루틴 실행됨");
+        // Debug.Log("코루틴 실행됨");
         healthbar.alpha = 1f;
         yield return new WaitForSeconds(showTime);
         
