@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement; // 씬 관리자 관련 코드
 using UnityEngine.UI; // UI 관련 코드
 using System.Collections;
+using System.Collections.Generic;
 
 // 필요한 UI에 즉시 접근하고 변경할 수 있도록 허용하는 UI 매니저
 public class UIManager : MonoBehaviour {
@@ -31,15 +32,66 @@ public class UIManager : MonoBehaviour {
 
     public GameObject scoreui;
     public InputField inputscore;
+    public GameObject RankPrefab; // 텍스트 프리팹
+    private List<GameObject> ranktext = new List<GameObject>();
+    public GameObject RankBoard;
+    public CanvasGroup reloadGroup;
     public int endscore;
     private bool checkbullet = true;
-    private string[] player = new string[100];
-    private int[] score = new int[100];
-    int index=0;
+
+    // private string[] player = new string[100];
+    // private int[] score = new int[100];
+    private Dictionary<string, int> playerScore;
+    // int index=0;
+    
+    private void Awake()
+    {
+        playerScore = new Dictionary<string, int>();
+    }
     // 탄약 텍스트 갱신
     void Start()
     {
+        LoadPlayerScoreData();
         ShowAllData();    
+    }
+
+    private void LoadPlayerScoreData()
+    {
+        int numberOfPlayer;
+
+        if ( !PlayerPrefs.HasKey("PlayerCount") )
+            PlayerPrefs.SetInt("PlayerCount", 0);
+
+        numberOfPlayer = PlayerPrefs.GetInt("PlayerCount");
+
+        for (int i = 0; i < numberOfPlayer; i++) {
+            playerScore.Add(
+                PlayerPrefs.GetString($"PlayerName_{i}"),
+                PlayerPrefs.GetInt($"PlayerScore_{i}")
+            );
+        }
+    }
+
+    private void SavePlayerScoreData()
+    {
+        int index = 0;
+        
+        foreach (KeyValuePair<string, int> data in playerScore) {
+            PlayerPrefs.SetString($"PlayerName_{index}", data.Key);
+            PlayerPrefs.SetInt($"PlayerScore_{index}", data.Value);
+            index++;
+        }
+
+        PlayerPrefs.SetInt("PlayerCount", index);
+
+        PlayerPrefs.Save();
+    }
+
+    private void OnEnable() {
+        
+    }
+    private void OnDisable() {
+        
     }
     public void UpdateAmmoText(int magAmmo, int remainAmmo) {
         ammoText.text = magAmmo + "/" + remainAmmo;
@@ -72,8 +124,10 @@ public class UIManager : MonoBehaviour {
 
     public void NameButton() {
         string username = inputscore.text;
-        Debug.Log(username);
+        // Debug.Log(username);
         SetScore(username,endscore);
+        // scoreui.SetActive(false);  // 이름 입력후 ui 사라짐.
+        Rank();
         // GetScore();
     }
 
@@ -83,17 +137,25 @@ public class UIManager : MonoBehaviour {
             SetActiveCrosshair(false);
             StartCoroutine(SetReloadMessage(1.0f));
         }
-        else if (bullet != 0)
+        else if (bullet != 0){
+            reloadtext.SetActive(false);
             SetActiveCrosshair(true);
+            }
     }
 
     private IEnumerator SetReloadMessage(float time) {
         
-        Debug.Log("reload message part");
+        // Debug.Log("reload message part");
         reloadtext.SetActive(true);
+
+        reloadGroup.alpha = 0;
+        StartCoroutine(FadeIn(reloadGroup, time-0.2f));
+
         yield return new WaitForSeconds(time);
+
+        StartCoroutine(FadeOut(reloadGroup, 0.5f));
         reloadtext.SetActive(false);
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f);
         checkbullet = true;
     }
     // 게임 재시작
@@ -102,46 +164,72 @@ public class UIManager : MonoBehaviour {
     }
 
     private void SetScore(string player, int score) {
-        string saveName;
-        int saveScore;
-        for (int i = 0; i < 100; i++ ) {
-            saveName = PlayerPrefs.GetString($"PlayerName{i}");
-            saveScore = PlayerPrefs.GetInt($"Score{i}");
-            if (player == saveName && saveScore < score) {
-                PlayerPrefs.SetInt($"Score{i}", score);
-                PlayerPrefs.Save();
-                return;
-            }
-            if (PlayerPrefs.HasKey($"PlayerName{index}") == false)
-                break;
-            Debug.Log(index);
-            index++;
+        // if ( !PlayerPrefs.HasKey("PlayerCount") )
+        //     PlayerPrefs.SetInt("PlayerCount", 0);
+        
+        // index = PlayerPrefs.GetInt("PlayerCount");
+        // for (int i = 0; i < index; i++ ) {
+        //     saveName = PlayerPrefs.GetString($"PlayerName{i}");
+        //     saveScore = PlayerPrefs.GetInt($"Score{i}");
+            
+        //     // 플레이어 이름이 등록되어 있으며 기존 점수보다 높을 때 갱신. 
+        //     if (player == saveName && saveScore < score) { 
+        //         PlayerPrefs.SetInt($"Score{i}", score);
+        //         PlayerPrefs.Save();
+        //         return ;
+        //     } else if (player == saveName && saveScore > score) {
+        //         return ;
+        //     }
+
+        //     Debug.Log("index : " + i);
+        // }
+
+        if ( playerScore.ContainsKey(player) && playerScore[player] < score) {
+            playerScore[player] = score;
         }
-        PlayerPrefs.SetString($"PlayerName{index}", player);
-        PlayerPrefs.SetInt($"Score{index}", score);
-        PlayerPrefs.Save();
-    }
-
-    private void GetScore() { 
-        for (int i = 0; i < index; i ++) {
-
+        else if (!playerScore.ContainsKey(player)) {
+            playerScore.Add(player, score);
         }
-        string PlayerList = PlayerPrefs.GetString("PlayerName");
-        int ScoreList = PlayerPrefs.GetInt("Score");
 
-        Debug.Log($"플레이어 : {PlayerList} 점수 : {ScoreList}");
+        SavePlayerScoreData();
     }
 
     public void ShowAllData() {
-        // PlayerPrefs.DeleteAll();
-        for (int i = 0; i < 100; i++) {
-            player[i] = PlayerPrefs.GetString($"PlayerName{i}");
-            score[i] = PlayerPrefs.GetInt($"Score{i}");
-            // string player = PlayerPrefs.GetString($"PlayerName{i}");
-            if (string.IsNullOrEmpty(player[i]))
-                break;
-            Debug.Log(PlayerPrefs.GetString($"PlayerName{i}"));
-            Debug.Log(PlayerPrefs.GetInt($"Score{i}"));
+        foreach (KeyValuePair<string, int> data in playerScore) {
+            Debug.Log($"name : {data.Key} score: {data.Value}");
         }
     }
+
+
+    private void Rank() {
+        RankBoard.SetActive(true);
+        Debug.Log(playerScore.Count);
+        for (int i = 0; i < playerScore.Count; i++) {
+            GameObject Ranks = Instantiate(RankPrefab,RankBoard.transform);
+            Text[] textlist = Ranks.GetComponentsInChildren<Text>();
+            int ranknum = i + 1;
+            
+            textlist[0].text =  ranknum.ToString();
+            textlist[1].text = PlayerPrefs.GetString($"PlayerName_{i}");
+            textlist[2].text = PlayerPrefs.GetInt($"PlayerScore_{i}").ToString();
+            ranktext.Add(Ranks);
+        }
+    }
+
+    private IEnumerator FadeIn(CanvasGroup target, float sec) {
+        float time = Mathf.Lerp(0f, 1f , sec * Time.deltaTime);
+        while (target.alpha < 0.9f) {
+            target.alpha += 0.1f;
+            yield return new WaitForSeconds(time);
+        }
+    }
+    private IEnumerator FadeOut(CanvasGroup target, float sec) {
+        float time = Mathf.Lerp(0f, 1f , sec * Time.deltaTime);
+
+        while (target.alpha > 0.1f) {
+            target.alpha -= 0.1f;
+            yield return new WaitForSeconds(time);
+        }
+    }
+
 }
